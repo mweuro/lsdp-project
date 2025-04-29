@@ -1,0 +1,98 @@
+{
+    "title": "Reddit Metrics Dashboard",
+    "refresh": "10s",
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "type": "heatmap",
+        "title": "Histogram: Score Postów",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 9 },
+        "targets": [
+          {
+            "expr": "rate(reddit_post_score_bucket[1m])",
+            "format": "heatmap",
+            "legendFormat": "le={{le}}",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus"
+      },
+      {
+        "type": "heatmap",
+        "title": "Histogram: Komentarze Postów",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 9 },
+        "targets": [
+          {
+            "expr": "rate(reddit_post_comments_bucket[1m])",
+            "format": "heatmap",
+            "legendFormat": "le={{le}}",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus"
+      },
+      {
+        "type": "timeseries",
+        "title": "Średni czas ładowania danych (s)",
+        "gridPos": { "x": 0, "y": 9, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(reddit_fetch_duration_seconds_sum[1m]) / rate(reddit_fetch_duration_seconds_count[1m])",
+            "legendFormat": "średni czas",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "decimals": 3
+          },
+          "overrides": []
+        },
+        "datasource": "Prometheus"
+      },
+      {
+        "type": "stat",
+        "title": "Liczba aktualnie pobranych postów",
+        "gridPos": { "x": 12, "y": 9, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "reddit_fetched_posts",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "datasource": "Prometheus"
+      },
+      {
+        "type": "timeseries",
+        "title": "Całkowita liczba pobranych postów (rate)",
+        "gridPos": { "x": 18, "y": 9, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "rate(reddit_posts_fetched_total[1m])",
+            "legendFormat": "posty/min",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          },
+          "overrides": []
+        },
+        "datasource": "Prometheus"
+      }
+    ],
+    "schemaVersion": 36,
+    "version": 1
+  }
+  
