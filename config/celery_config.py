@@ -12,7 +12,7 @@ accept_content = ['json']
 
 # Celery config
 broker_url = "amqp://user:password@rabbitmq:5672/"
-result_backend = "rpc://"
+result_backend = "redis://redis:6379/0"
 
 # Timezone settings
 timezone = 'Europe/Warsaw'
@@ -25,12 +25,15 @@ SCHEDULE_TIME = float(os.getenv("SCHEDULE_TIME", 20.0))
 
 # Celery beat schedule
 beat_schedule = {
-    'reddit_submissions': {
-        'task': 'app.tasks.reddit_submissions',
+    'PIPELINE': {
+        'task': 'app.tasks.pipeline',
         'schedule': schedule(SCHEDULE_TIME),
         'kwargs': {
-            'subreddit_name': SUBREDDIT_NAME,
+            'subreddit': SUBREDDIT_NAME,
             'limit': SUBMISSION_LIMIT
         }
     }
 }
+
+# Prefetch multiplier setting
+worker_prefetch_multiplier = 1

@@ -1,0 +1,72 @@
+version: '3.8'
+
+x-redash-service: &redash-service
+  image: redash/redash:10.1.0.b50633
+  environment: &redash-env
+    REDASH_DATABASE_URL: postgres://reddit:reddit@postgres/redash
+    REDASH_REDIS_URL: redis://redis:6379/0
+    REDASH_WEB_WORKERS: 4
+    REDASH_ADHOC_QUERY_WORKERS: 2
+    REDASH_SCHEDULER_WORKERS: 1
+    REDASH_LOG_LEVEL: DEBUG
+    REDASH_COOKIE_SECRET: df6225b3677e6c070029ca2edc223b7b6b0c50f5584967f7519580ef6ef93b29
+    REDASH_SECRET_KEY: b7f09a21f47ef2fb4e217294fb74f624028c2adc384fcd1852a98f8db9a1c697
+
+services:
+  server:
+    <<: *redash-service
+    command: server
+    ports:
+      - "5001:5000"
+    environment:
+      <<: *redash-env
+    networks:
+      - shared-net
+
+  scheduler:
+    <<: *redash-service
+    command: scheduler
+    depends_on:
+      - server
+    networks:
+      - shared-net
+
+  scheduled_worker:
+    <<: *redash-service
+    command: worker
+    depends_on:
+      - server
+    environment:
+      <<: *redash-env
+      QUEUES: scheduled_queries,schemas
+      WORKERS_COUNT: 1
+    networks:
+      - shared-net
+
+  adhoc_worker:
+    <<: *redash-service
+    command: worker
+    depends_on:
+      - server
+    environment:
+      <<: *redash-env
+      REDASH_QUERY_RESULTS_CLEANUP_ENABLED: "true"
+      REDASH_QUERY_RESULTS_CLEANUP_MAX_AGE: "7"
+      QUEUES: queries
+      WORKERS_COUNT: 2
+    networks:
+      - shared-net
+
+  worker:
+    <<: *redash-service
+    command: worker
+    environment:
+      <<: *redash-env
+      QUEUES: periodic,emails,default
+      WORKERS_COUNT: 1
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    external: true

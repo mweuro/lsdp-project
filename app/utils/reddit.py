@@ -3,18 +3,17 @@ import os
 import praw
 
 
-
 class RedditScraper:
     """
-    A class to scrape Reddit submissions using the PRAW library.
+    A Singleton class to scrape Reddit submissions using the PRAW library.
     """
+    _instance = None
 
-    def __init__(self):
-        """
-        Initialize the RedditScraper class and authenticate with Reddit API.
-        """
-        self.reddit = self.__reddit_auth()
-    
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(RedditScraper, cls).__new__(cls, *args, **kwargs)
+            cls._instance.reddit = cls._instance.__reddit_auth()
+        return cls._instance
 
     def __reddit_auth(self) -> praw.Reddit:
         """
@@ -31,39 +30,30 @@ class RedditScraper:
             'user_agent': os.getenv('USER_AGENT'),
             'username': os.getenv('USERNAME')
         }
-        reddit = praw.Reddit(**reddit_credentials)
-        return reddit
+        return praw.Reddit(**reddit_credentials)
 
-
-    def get_submissions(self, 
-                        subreddit_name: str,
-                        limit: int) -> tuple:
+    def get_submissions(self, subreddit: str, limit: int) -> list:
         """
-        Return a list of Reddit submissions and their IDs.
+        Return a list of Reddit submissions.
 
         Args:
-            subreddit_name (str): The name of the subreddit.
+            subreddit (str): The name of the subreddit.
             limit (int): The maximum number of submissions to retrieve.
-        
+
         Returns:
-            tuple: A tuple containing a list of submissions and a list of their IDs.
+            list: A list of Reddit submissions.
         """
-
-        subreddit = self.reddit.subreddit(subreddit_name)
-        submissions = list(subreddit.new(limit=limit))
-        return submissions
-
-
-
+        subreddit = self.reddit.subreddit(subreddit)
+        return list(subreddit.new(limit=limit))
 
 
 def get_submission_info(submission: praw.models.Submission) -> dict:
     """
     Extract relevant information from a Reddit submission.
-    
+
     Args:
         submission (praw.models.Submission): The Reddit submission object.
-    
+
     Returns:
         dict: A dictionary containing the submission's information.
     """

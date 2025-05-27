@@ -10,7 +10,7 @@ SCHEDULE_TIME=${SCHEDULE_TIME:-20.0}
 TEMPLATE_FILE="config/prometheus.template.yml"
 TARGET_FILE="config/prometheus.yml"
 
-echo "Generating prometheus.yml with scrape_interval=${SCHEDULE_TIME}s"
+echo "🔄 Generating prometheus.yml with scrape_interval=${SCHEDULE_TIME}s"
 sed "s/{{SCRAPE_INTERVAL}}/${SCHEDULE_TIME}/g" "$TEMPLATE_FILE" > "$TARGET_FILE"
 
 
@@ -19,10 +19,11 @@ export SUBREDDIT_NAME
 export SUBMISSION_LIMIT
 export SCHEDULE_TIME
 
-echo "  Using parameters:"
+echo "🔧 Using parameters:"
 echo "  SUBREDDIT_NAME=$SUBREDDIT_NAME"
 echo "  SUBMISSION_LIMIT=$SUBMISSION_LIMIT"
 echo "  SCHEDULE_TIME=$SCHEDULE_TIME"
 
 # Run the task
+docker network create shared-net
 docker-compose up --build
